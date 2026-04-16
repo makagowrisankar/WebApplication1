@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Universal Problem Solver</title>
+
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial;
+            background: linear-gradient(to right, #5f9cff, #4ecdc4);
+        }
+
+        input {
+            padding: 10px;
+            width: 250px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            margin: 15px auto;
+            width: 250px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🌍 Universal Problem Solver</h1>
+
+    <!-- SEARCH -->
+    <input type="text" id="search" placeholder="Search service (car, plumber...)">
+    <button onclick="findServices()">Find</button>
+
+    <br><br>
+
+    <!-- BUTTONS -->
+    <button onclick="logout()">Logout</button>
+    <button onclick="window.location.href='bookings.html'">My Bookings</button>
+
+    <h2>Available Services</h2>
+
+    <!-- RESULTS -->
+    <div id="services"></div>
+
+    <script>
+
+        // 🔍 FIND SERVICES
+        async function findServices() {
+
+            const service = document.getElementById("search").value;
+
+            const response = await fetch(`/providers?service=${service}&lat=16.5062&lng=80.6480`);
+            const data = await response.json();
+
+            const container = document.getElementById("services");
+            container.innerHTML = "";
+
+            if (data.length === 0) {
+                container.innerHTML = "<p>No service found</p>";
+                return;
+            }
+
+            data.forEach(p => {
+                container.innerHTML += `
+                        <div class="card">
+                            <h3>${p.name}</h3>
+                            <p>${p.service}</p>
+
+                            <button onclick="bookService('${p.name}', '${p.service}')">
+                                Book
+                            </button>
+                        </div>
+                    `;
+            });
+        }
+
+        // 🔥 PRO BOOK FUNCTION (UPDATED)
+        async function bookService(providerName, service) {
+
+            const userEmail = localStorage.getItem("userEmail");
+
+            if (!userEmail) {
+                alert("❌ Please login first");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const response = await fetch("/book", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    userEmail: userEmail,
+                    service: service,
+                    providerName: providerName
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert("🎉 Booking Successful!");
+            } else {
+                alert("❌ Booking Failed");
+            }
+        }
+
+        // 🔐 LOGOUT
+        function logout() {
+            localStorage.removeItem("userEmail");
+            window.location.href = "login.html";
+        }
+
+    </script>
+
+</body>
+</html>
