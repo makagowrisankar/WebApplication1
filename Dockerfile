@@ -1,11 +1,18 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /app
 
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish WebApplication1.csproj -c Release -o out
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
-COPY --from=build /app/out ./
+COPY --from=build /app/out .
 
-CMD ["dotnet", "WebApplication1.dll"]
+# Render requires this
+ENV ASPNETCORE_URLS=http://+:10000
+
+EXPOSE 10000
+
+ENTRYPOINT ["dotnet", "WebApplication1.dll"]
