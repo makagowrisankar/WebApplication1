@@ -1,12 +1,10 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
-    console.log("Script loaded ✅");
-});
+﻿const BASE_URL = "https://universal-solver.onrender.com";
 
 // 🔍 SEARCH
 async function findServices() {
     const service = document.getElementById("search").value;
 
-    const response = await fetch(`https://localhost:7262/providers?service=${service}&lat=16.5062&lng=80.6480`);
+    const response = await fetch(`${BASE_URL}/providers?service=${service}&lat=16.5062&lng=80.6480`);
     const data = await response.json();
 
     const container = document.getElementById("services");
@@ -30,9 +28,7 @@ async function findServices() {
         const button = document.createElement("button");
         button.innerText = "Book";
 
-        // ✅ IMPORTANT FIX
         button.addEventListener("click", function () {
-            console.log("Button clicked:", p.name);
             bookService(p.name, p.service);
         });
 
@@ -44,13 +40,10 @@ async function findServices() {
     });
 }
 
-
 // 📦 BOOK FUNCTION
 async function bookService(providerName, service) {
-    alert("Clicked: " + providerName); // 🔥 TEMP DEBUG
-
     try {
-        const response = await fetch("https://localhost:7262/book", {
+        const response = await fetch(`${BASE_URL}/book`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
