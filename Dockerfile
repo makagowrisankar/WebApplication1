@@ -1,18 +1,16 @@
-# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+# Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+EXPOSE 80
 
-COPY . ./
-RUN dotnet publish WebApplication1.csproj -c Release -o out
+# Build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
 
-# Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+# Final
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/out .
-
-# ✅ IMPORTANT FIX FOR RENDER
-ENV ASPNETCORE_URLS=http://0.0.0.0:10000
-
-EXPOSE 10000
-
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "WebApplication1.dll"]
