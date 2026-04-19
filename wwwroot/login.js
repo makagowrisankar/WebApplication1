@@ -11,9 +11,9 @@
         body: JSON.stringify({ email, password })
     });
 
-    const data = await response.text(); // ✅ changed
+    const data = await response.json();
 
-    if (data === "Login Success") {
+    if (data.success) {
 
         // 🔥 SAVE USER EMAIL
         localStorage.setItem("userEmail", email);
