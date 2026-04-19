@@ -10,6 +10,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
+// ✅ IMPORTANT: Bind to Render port
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+app.Urls.Add($"http://0.0.0.0:{port}");
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
