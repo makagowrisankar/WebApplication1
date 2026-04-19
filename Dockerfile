@@ -10,8 +10,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
 COPY --from=build /app/out .
 
-# Render requires this
-ENV ASPNETCORE_URLS=http://+:10000
+# ✅ IMPORTANT FIX FOR RENDER
+ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 
 EXPOSE 10000
 

@@ -54,7 +54,7 @@ app.MapPost("/book", () =>
 
 
 // ✅ PORT FIX (VERY IMPORTANT)
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 app.Urls.Add($"http://0.0.0.0:{port}");
 
 app.Run();
