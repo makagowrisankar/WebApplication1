@@ -4,18 +4,35 @@ using WebApplication1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ DB connection (change if needed)
+// ✅ DB connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// ✅ IMPORTANT: Bind to Render port
+// ✅ Bind to Render port
 var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
 app.Urls.Add($"http://0.0.0.0:{port}");
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+
+// 🔥 ADD DEFAULT USER HERE 👇
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (!db.Users.Any())
+    {
+        db.Users.Add(new User
+        {
+            Email = "admin@gmail.com",
+            Password = "1234"
+        });
+        db.SaveChanges();
+    }
+}
 
 
 // 🔐 REGISTER
