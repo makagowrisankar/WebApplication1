@@ -7,8 +7,8 @@ namespace WebApplication1.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Provider> Providers { get; set; }
-        public DbSet<Booking> Bookings { get; set; }
+        public DbSet<User> Users => Set<User>();
+        public DbSet<Provider> Providers => Set<Provider>();
+        public DbSet<Booking> Bookings => Set<Booking>();
     }
 }

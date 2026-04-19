@@ -1,64 +1,51 @@
-using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data;
+using WebApplication1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ CORS (important)
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+// ✅ DB connection (change if needed)
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-app.UseCors();
-
-// ✅ static files
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
 
-// 🔐 LOGIN (dummy)
-app.MapPost("/login", (User user) =>
+// 🔐 REGISTER
+app.MapPost("/register", async (AppDbContext db, User user) =>
 {
-    if (user.Email == "admin@gmail.com" && user.Password == "1234")
-        return Results.Json(new { success = true });
-
-    return Results.Json(new { success = false });
+    db.Users.Add(user);
+    await db.SaveChangesAsync();
+    return Results.Ok("User Registered");
 });
 
-
-// 🔍 FIND SERVICES (dummy data)
-app.MapGet("/providers", (string service) =>
+// 🔐 LOGIN
+app.MapPost("/login", async (AppDbContext db, User loginUser) =>
 {
-    var data = new[]
-    {
-        new { Name = "Ravi Plumber", Service = "plumber" },
-        new { Name = "Kumar Electrician", Service = "electrician" },
-        new { Name = "Suresh Cleaner", Service = "cleaner" }
-    };
+    var user = await db.Users
+        .FirstOrDefaultAsync(u => u.Email == loginUser.Email && u.Password == loginUser.Password);
 
-    return Results.Json(data);
+    if (user == null)
+        return Results.Unauthorized();
+
+    return Results.Ok("Login Success");
 });
 
-
-// 📦 BOOK SERVICE (dummy)
-app.MapPost("/book", () =>
+// 📍 GET PROVIDERS
+app.MapGet("/providers", async (AppDbContext db) =>
 {
-    return Results.Json(new { success = true });
+    return await db.Providers.ToListAsync();
 });
 
-
-// ✅ PORT FIX (VERY IMPORTANT)
-var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
-app.Urls.Add($"http://0.0.0.0:{port}");
+// 📅 BOOK SERVICE
+app.MapPost("/book", async (AppDbContext db, Booking booking) =>
+{
+    db.Bookings.Add(booking);
+    await db.SaveChangesAsync();
+    return Results.Ok("Booked Successfully");
+});
 
 app.Run();
-
-
-// 🔽 SIMPLE MODELS
-record User(string Email, string Password);
