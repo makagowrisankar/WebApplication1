@@ -4,7 +4,7 @@ using WebApplication1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ DB connection
+// ✅ Use SQLite database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=app.db"));
 
@@ -17,11 +17,12 @@ app.Urls.Add($"http://0.0.0.0:{port}");
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-
-// 🔥 ADD DEFAULT USER HERE 👇
+// ✅ Create DB + default user (ONLY ONCE)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    db.Database.EnsureCreated();
 
     if (!db.Users.Any())
     {
@@ -30,10 +31,10 @@ using (var scope = app.Services.CreateScope())
             Email = "admin@gmail.com",
             Password = "1234"
         });
+
         db.SaveChanges();
     }
 }
-
 
 // 🔐 REGISTER
 app.MapPost("/register", async (AppDbContext db, User user) =>
